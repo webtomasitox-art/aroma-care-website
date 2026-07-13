@@ -110,6 +110,21 @@ export default async function ProductPage({ params }: { params: { slug: string }
           </section>
         )}
 
+        {/* מתכון שימוש ביתי - רק אם קיים במקור, מוצג כטאב סגור */}
+        {product.recipe && (
+          <section className="max-w-3xl mt-12">
+            <details className="group">
+              <summary className="font-heading text-xl text-amber-deep cursor-pointer list-none flex items-center gap-2">
+                <span className="inline-block transition-transform group-open:rotate-90">›</span>
+                מתכון לשימוש ביתי
+              </summary>
+              <p className="font-body text-sm text-charcoal/75 leading-relaxed whitespace-pre-line mt-4">
+                {product.recipe}
+              </p>
+            </details>
+          </section>
+        )}
+
         {/* מוצרים דומים */}
         {relatedProducts.length > 0 && (
           <section className="mt-20">
