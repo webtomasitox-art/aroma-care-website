@@ -9,15 +9,16 @@ import type { Product } from "@/types/product";
 
 interface ProductCardProps {
   product: Product;
+  index?: number;
+  featured?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, index, featured = false }: ProductCardProps) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
 
-  // "פס המרכיב" - האלמנט הייחודי מהקונספט: 2-3 רכיבים אמיתיים מתחת לשם
-  const featuredIngredients = product.ingredients?.slice(0, 2) ?? [];
   const hasVariants = !!product.variants && product.variants.length > 0;
+  const numberTag = typeof index === "number" ? String(index + 1).padStart(2, "0") : null;
 
   function handleQuickAdd(e: React.MouseEvent) {
     e.preventDefault();
@@ -38,49 +39,54 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/product/${product.id}`}
-      className="group block bg-cream rounded-xl p-4 border border-amber-gold/15 hover:border-amber-gold/40 transition-colors duration-300"
+      className={`group block ${featured ? "md:col-span-2" : ""}`}
     >
-      <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-white mb-4">
+      <div
+        className={`relative overflow-hidden bg-warmWhite rounded-[3px] ${
+          featured ? "aspect-[16/10]" : "aspect-[4/5]"
+        }`}
+      >
         <Image
           src={product.mainImage}
           alt={product.name}
           fill
-          sizes="(max-width: 768px) 50vw, 25vw"
-          className="object-contain p-3 transition-transform duration-500 group-hover:scale-[1.03]"
+          sizes={featured ? "100vw" : "(max-width: 768px) 50vw, 25vw"}
+          className="object-contain p-6 md:p-10 transition-transform duration-700 ease-out group-hover:scale-[1.06]"
         />
-      </div>
 
-      <p className="font-heading text-[15px] text-amber-deep leading-snug">{product.name}</p>
-      {product.nameEn && (
-        <p className="ltr-inline font-accent italic text-xs text-amber-gold mt-0.5">
-          {product.nameEn}
-        </p>
-      )}
+        {numberTag && (
+          <span className="absolute top-3 right-3 font-label text-[10px] tracking-[0.15em] text-copper">
+            N&deg;{numberTag}
+          </span>
+        )}
 
-      {featuredIngredients.length > 0 && (
-        <p className="font-label text-[10px] tracking-wide text-olive mt-2">
-          {featuredIngredients.join(" · ")}
-        </p>
-      )}
-
-      <div className="flex items-center justify-between mt-3 mb-3">
-        <span className="font-body text-sm font-medium text-charcoal">{product.price} ₪</span>
-        {product.volume && (
-          <span className="font-label text-[11px] text-charcoal/50">{product.volume}</span>
+        {/* Quick Add - hover on desktop, always visible small link on mobile */}
+        {!hasVariants && (
+          <button
+            onClick={handleQuickAdd}
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 md:opacity-0 md:translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 font-label text-[11px] tracking-[0.1em] bg-amber-deep text-cream px-4 py-2 rounded-[2px]"
+          >
+            {added ? "נוסף" : "+ הוסיפי לסל"}
+          </button>
         )}
       </div>
 
-      {hasVariants ? (
-        <span className="block text-center font-body text-xs tracking-wide border border-amber-gold/40 text-amber-deep rounded-sm py-2">
-          בחרו נפח
-        </span>
-      ) : (
-        <button
-          onClick={handleQuickAdd}
-          className="w-full font-body text-xs tracking-wide bg-amber-deep text-cream rounded-sm py-2 hover:bg-charcoal transition-colors"
-        >
-          {added ? "נוסף לסל" : "הוסיפי לסל"}
-        </button>
+      <div className="mt-4 flex items-start justify-between gap-3">
+        <div>
+          <p className="font-heading text-[15px] text-charcoal leading-snug">{product.name}</p>
+          {(product.nameEn || product.latinName) && (
+            <p className="ltr-inline font-accent italic text-[13px] text-copper mt-0.5">
+              {product.latinName ?? product.nameEn}
+            </p>
+          )}
+        </div>
+        <span className="font-body text-sm text-charcoal/70 shrink-0 mt-0.5">{product.price} ₪</span>
+      </div>
+
+      {(product.volume || hasVariants) && (
+        <p className="font-label text-[10px] text-charcoal/40 mt-1">
+          {hasVariants ? "מספר נפחים לבחירה" : product.volume}
+        </p>
       )}
     </Link>
   );
