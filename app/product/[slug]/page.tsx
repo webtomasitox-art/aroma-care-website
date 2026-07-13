@@ -67,13 +67,20 @@ export default async function ProductPage({ params }: { params: { slug: string }
           <ProductPurchasePanel product={product} />
         </div>
 
-        {/* תיאור מלא - רק אם יש תוכן מעבר לתיאור הקצר */}
-        <section className="max-w-3xl mt-16">
-          <h2 className="font-heading text-xl text-amber-deep mb-4">על המוצר</h2>
-          <p className="font-body text-sm text-charcoal/75 leading-relaxed whitespace-pre-line">
-            {product.fullDescription}
-          </p>
-        </section>
+        {/* תיאור מלא - רק החלק שלא כבר מוצג כתיאור הקצר מעל */}
+        {(() => {
+          const remainder = product.fullDescription.startsWith(product.shortDescription)
+            ? product.fullDescription.slice(product.shortDescription.length).trim()
+            : product.fullDescription;
+          return remainder ? (
+            <section className="max-w-3xl mt-16">
+              <h2 className="font-heading text-xl text-amber-deep mb-4">על המוצר</h2>
+              <p className="font-body text-sm text-charcoal/75 leading-relaxed whitespace-pre-line">
+                {remainder}
+              </p>
+            </section>
+          ) : null;
+        })()}
 
         {/* רכיבים - רק אם זוהו רכיבים מובנים */}
         {product.ingredients && product.ingredients.length > 0 && (
