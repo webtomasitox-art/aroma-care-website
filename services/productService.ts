@@ -11,7 +11,7 @@ import mockProducts from "@/mocks/products.json";
 
 export async function getAllProducts(): Promise<Product[]> {
   if (DATA_MODE === "mock") {
-    return mockProducts as Product[];
+    return mockProducts as unknown as Product[];
   }
 
   // TODO: להשלים לאחר חיבור Wix - שלוף מוצרים אמיתיים דרך lib/wix/client.ts
