@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/hooks/useCart";
@@ -7,13 +8,36 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
 import { trackEvent } from "@/lib/analytics/events";
+import { createWixCheckoutUrl } from "@/lib/wix/checkout";
 import { siteConfig } from "@/config/site";
 
 export default function CartPage() {
   const { cart, removeItem, updateQuantity } = useCart();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
-  function handleCheckout() {
+  async function handleCheckout() {
+    setCheckoutError(null);
+    setIsCheckingOut(true);
     trackEvent("begin_checkout", { itemCount: cart.items.length, subtotal: cart.subtotal });
+
+    try {
+      const { checkoutUrl, missingItems } = await createWixCheckoutUrl(cart.items);
+      if (missingItems.length > 0) {
+        console.warn(
+          "המוצרים הבאים לא נמצאו ב-Wix ולא נכללו בתשלום:",
+          missingItems.map((i) => i.name)
+        );
+      }
+      window.location.href = checkoutUrl;
+    } catch (err) {
+      setCheckoutError(
+        err instanceof Error
+          ? err.message
+          : "לא הצלחנו להתחבר לתשלום כרגע. נסו שוב בעוד רגע."
+      );
+      setIsCheckingOut(false);
+    }
   }
 
   return (
@@ -108,13 +132,14 @@ export default function CartPage() {
 
               <button
                 onClick={handleCheckout}
-                className="w-full font-body text-sm bg-amber-deep text-cream px-6 py-3 rounded-sm hover:bg-charcoal transition-colors"
+                disabled={isCheckingOut}
+                className="w-full font-body text-sm bg-amber-deep text-cream px-6 py-3 rounded-sm hover:bg-charcoal transition-colors disabled:opacity-60"
               >
-                מעבר לתשלום
+                {isCheckingOut ? "מעביר אותך לתשלום..." : "מעבר לתשלום"}
               </button>
-              <p className="font-label text-[10px] text-charcoal/40 mt-3 text-center">
-                TODO: יחובר ל-Wix Checkout בשלב ז&apos;
-              </p>
+              {checkoutError && (
+                <p className="font-body text-xs text-red-700 mt-3 text-center">{checkoutError}</p>
+              )}
 
               <Link
                 href="/category/face-care"
