@@ -4,6 +4,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CategoryProductGrid } from "@/components/collections/CategoryProductGrid";
+import { buildBreadcrumbSchema } from "@/lib/seo/metadata";
+import { siteConfig } from "@/config/site";
 import type { Product } from "@/types/product";
 
 const categoryMap: Record<string, { title: string; titleEn: string; intro: string; match: (p: Product) => boolean }> = {
@@ -25,15 +27,36 @@ export function generateStaticParams() {
   return Object.keys(categoryMap).map((slug) => ({ slug }));
 }
 
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const category = categoryMap[params.slug];
+  if (!category) return {};
+  const title = `${category.title} | ${category.titleEn} - ${siteConfig.name}`;
+  return {
+    title,
+    description: category.intro,
+    alternates: { canonical: `/category/${params.slug}` },
+    openGraph: { title, description: category.intro },
+  };
+}
+
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
   const category = categoryMap[params.slug];
   if (!category) notFound();
 
   const allProducts = await getAllProducts();
   const products = allProducts.filter(category.match);
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { label: "בית", href: "/" },
+    { label: category.title, href: `/category/${params.slug}` },
+  ]);
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       <Header />
 
       <main className="max-w-6xl mx-auto px-6 py-10">
