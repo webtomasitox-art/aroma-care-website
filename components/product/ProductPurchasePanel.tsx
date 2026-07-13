@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useCart } from "@/hooks/useCart";
 import { trackEvent } from "@/lib/analytics/events";
+import { checkLiveStock } from "@/lib/wix/stock";
 import type { Product } from "@/types/product";
 
 export function ProductPurchasePanel({ product }: { product: Product }) {
@@ -11,15 +12,26 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
+  // מצב המלאי האמיתי מ-Wix. null = עדיין בבדיקה / לא ידוע, ואז מתבססים על הנתון המקומי כברירת מחדל
+  const [liveInStock, setLiveInStock] = useState<boolean | null>(null);
+  const [stockChecked, setStockChecked] = useState(false);
+
   const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId);
   const displayPrice = selectedVariant?.priceOverride ?? product.price;
+  const effectiveInStock = liveInStock ?? product.inStock;
 
   useEffect(() => {
     trackEvent("view_item", { productId: product.id, price: displayPrice });
+
+    checkLiveStock(product.name, product.nameEn).then((result) => {
+      setLiveInStock(result);
+      setStockChecked(true);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleAddToCart() {
+    if (!effectiveInStock) return;
     addItem({
       productId: product.id,
       variantId: selectedVariant?.id,
@@ -98,14 +110,16 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
 
         <button
           onClick={handleAddToCart}
-          className="flex-1 font-body text-sm tracking-wide bg-amber-deep text-cream px-6 py-3 rounded-sm hover:bg-charcoal transition-colors"
+          disabled={!effectiveInStock}
+          className="flex-1 font-body text-sm tracking-wide bg-amber-deep text-cream px-6 py-3 rounded-sm hover:bg-charcoal transition-colors disabled:bg-charcoal/20 disabled:text-charcoal/40 disabled:cursor-not-allowed"
         >
-          {added ? "נוסף לסל" : "הוסיפי לסל"}
+          {!effectiveInStock ? "אזל מהמלאי" : added ? "נוסף לסל" : "הוסיפי לסל"}
         </button>
       </div>
 
       <p className="font-label text-[11px] text-olive mt-4">
-        {product.inStock ? "במלאי" : "אזל מהמלאי"}
+        {effectiveInStock ? "במלאי" : "אזל מהמלאי"}
+        {!stockChecked && " (בודק מלאי עדכני...)"}
       </p>
 
       {/* Sticky Add to Cart במובייל בלבד */}
@@ -115,9 +129,10 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         </span>
         <button
           onClick={handleAddToCart}
-          className="flex-1 font-body text-sm tracking-wide bg-amber-deep text-cream px-6 py-3 rounded-sm"
+          disabled={!effectiveInStock}
+          className="flex-1 font-body text-sm tracking-wide bg-amber-deep text-cream px-6 py-3 rounded-sm disabled:bg-charcoal/20 disabled:text-charcoal/40"
         >
-          {added ? "נוסף לסל" : "הוסיפי לסל"}
+          {!effectiveInStock ? "אזל מהמלאי" : added ? "נוסף לסל" : "הוסיפי לסל"}
         </button>
       </div>
     </div>
