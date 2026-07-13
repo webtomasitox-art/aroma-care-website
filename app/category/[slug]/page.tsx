@@ -9,17 +9,16 @@ import { buildBreadcrumbSchema } from "@/lib/seo/metadata";
 import { siteConfig } from "@/config/site";
 import type { Product } from "@/types/product";
 
-const categoryMap: Record
-  string,
-  {
-    number: string;
-    title: string;
-    titleEn: string;
-    intro: string;
-    contentLine: string;
-    match: (p: Product) => boolean;
-  }
-> = {
+interface CategoryConfig {
+  number: string;
+  title: string;
+  titleEn: string;
+  intro: string;
+  contentLine: string;
+  match: (p: Product) => boolean;
+}
+
+const categoryMap: Record<string, CategoryConfig> = {
   "face-care": {
     number: "N°01",
     title: "טיפוח פנים",
