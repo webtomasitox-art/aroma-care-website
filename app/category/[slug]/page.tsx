@@ -4,8 +4,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CategoryProductGrid } from "@/components/collections/CategoryProductGrid";
+import type { Product } from "@/types/product";
 
-const categoryMap: Record<string, { title: string; titleEn: string; intro: string; match: (p: { category: string; subcategory?: string }) => boolean }> = {
+const categoryMap: Record<string, { title: string; titleEn: string; intro: string; match: (p: Product) => boolean }> = {
   "face-care": {
     title: "טיפוח פנים",
     titleEn: "Face Care",
