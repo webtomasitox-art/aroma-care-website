@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useCart } from "@/hooks/useCart";
 import { trackEvent } from "@/lib/analytics/events";
-import { TrustBadges } from "@/components/product/TrustBadges";
 import type { Product } from "@/types/product";
 
 export function ProductPurchasePanel({ product }: { product: Product }) {
@@ -45,17 +44,17 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         </p>
       )}
 
+      {/* תיאור המוצר - מיד מתחת לשם */}
+      <p className="font-body text-[15px] text-charcoal/85 leading-[1.8] mt-4">
+        {product.shortDescription}
+      </p>
+
       <div className="flex items-baseline gap-3 mt-5">
         <span className="font-body text-2xl font-medium text-charcoal">{displayPrice} ₪</span>
         {!selectedVariant && product.volume && (
           <span className="font-label text-sm text-charcoal/50">{product.volume}</span>
         )}
       </div>
-
-      {/* תיאור המוצר - בולט, מעל כפתורי הרכישה */}
-      <p className="font-body text-[15px] text-charcoal/85 leading-[1.8] mt-5 pr-4 border-r-2 border-amber-gold/40">
-        {product.shortDescription}
-      </p>
 
       {product.variants && product.variants.length > 0 && (
         <div className="mt-6">
@@ -108,8 +107,6 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
       <p className="font-label text-[11px] text-olive mt-4">
         {product.inStock ? "במלאי" : "אזל מהמלאי"}
       </p>
-
-      <TrustBadges />
 
       {/* Sticky Add to Cart במובייל בלבד */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-cream/95 backdrop-blur border-t border-amber-gold/20 p-3 flex items-center gap-3">
