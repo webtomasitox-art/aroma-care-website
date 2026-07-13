@@ -18,7 +18,9 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
 
   const selectedVariant = product.variants?.find((v) => v.id === selectedVariantId);
   const displayPrice = selectedVariant?.priceOverride ?? product.price;
-  const effectiveInStock = liveInStock ?? product.inStock;
+  // כל עוד הבדיקה האמיתית עדיין רצה, הכפתור נעול - כדי שלא יהיה חלון זמן
+  // שבו אפשר להוסיף מוצר שבפועל אזל מהמלאי לפני שהתשובה מ-Wix חזרה.
+  const canAddToCart = stockChecked && (liveInStock ?? product.inStock);
 
   useEffect(() => {
     trackEvent("view_item", { productId: product.id, price: displayPrice });
@@ -31,7 +33,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
   }, []);
 
   function handleAddToCart() {
-    if (!effectiveInStock) return;
+    if (!canAddToCart) return;
     addItem({
       productId: product.id,
       variantId: selectedVariant?.id,
@@ -110,16 +112,21 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
 
         <button
           onClick={handleAddToCart}
-          disabled={!effectiveInStock}
+          disabled={!canAddToCart}
           className="flex-1 font-body text-sm tracking-wide bg-amber-deep text-cream px-6 py-3 rounded-sm hover:bg-charcoal transition-colors disabled:bg-charcoal/20 disabled:text-charcoal/40 disabled:cursor-not-allowed"
         >
-          {!effectiveInStock ? "אזל מהמלאי" : added ? "נוסף לסל" : "הוסיפי לסל"}
+          {!stockChecked
+            ? "בודק מלאי..."
+            : !canAddToCart
+              ? "אזל מהמלאי"
+              : added
+                ? "נוסף לסל"
+                : "הוסיפי לסל"}
         </button>
       </div>
 
       <p className="font-label text-[11px] text-olive mt-4">
-        {effectiveInStock ? "במלאי" : "אזל מהמלאי"}
-        {!stockChecked && " (בודק מלאי עדכני...)"}
+        {!stockChecked ? "בודק מלאי עדכני..." : canAddToCart ? "במלאי" : "אזל מהמלאי"}
       </p>
 
       {/* Sticky Add to Cart במובייל בלבד */}
@@ -129,10 +136,16 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         </span>
         <button
           onClick={handleAddToCart}
-          disabled={!effectiveInStock}
+          disabled={!canAddToCart}
           className="flex-1 font-body text-sm tracking-wide bg-amber-deep text-cream px-6 py-3 rounded-sm disabled:bg-charcoal/20 disabled:text-charcoal/40"
         >
-          {!effectiveInStock ? "אזל מהמלאי" : added ? "נוסף לסל" : "הוסיפי לסל"}
+          {!stockChecked
+            ? "בודק מלאי..."
+            : !canAddToCart
+              ? "אזל מהמלאי"
+              : added
+                ? "נוסף לסל"
+                : "הוסיפי לסל"}
         </button>
       </div>
     </div>
