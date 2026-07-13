@@ -27,6 +27,7 @@ export interface Product {
   ingredients?: string[] | null;
   benefits?: string[] | null;
   usageInstructions?: string | null;
+  recipe?: string | null;       // מתכון שימוש ביתי (רלוונטי לשמנים אתריים) - יוצג בטאב סגור
   warnings?: string | null;  // TODO: ברוב המוצרים לא צוינו אזהרות מפורשות
   skinType?: string | null;  // כפי שמופיע במקור, לרוב "מתאים לכל סוגי העור"
   inStock: boolean;          // TODO: אין מידע מלאי במקור - ברירת מחדל true עד לחיבור Wix
