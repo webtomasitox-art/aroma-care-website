@@ -24,6 +24,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
       productId: product.id,
       variantId: selectedVariant?.id,
       name: product.name,
+      nameEn: product.nameEn,
       variantLabel: selectedVariant?.label,
       price: displayPrice,
       quantity,
