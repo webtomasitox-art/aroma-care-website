@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useCart } from "@/hooks/useCart";
 import { trackEvent } from "@/lib/analytics/events";
+import { TrustBadges } from "@/components/product/TrustBadges";
 import type { Product } from "@/types/product";
 
 export function ProductPurchasePanel({ product }: { product: Product }) {
@@ -32,6 +33,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+    trackEvent("add_to_cart", { productId: product.id, quantity });
   }
 
   return (
@@ -50,7 +52,8 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         )}
       </div>
 
-      <p className="font-body text-sm text-charcoal/75 leading-relaxed mt-5">
+      {/* תיאור המוצר - בולט, מעל כפתורי הרכישה */}
+      <p className="font-body text-[15px] text-charcoal/85 leading-[1.8] mt-5 pr-4 border-r-2 border-amber-gold/40">
         {product.shortDescription}
       </p>
 
@@ -105,6 +108,21 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
       <p className="font-label text-[11px] text-olive mt-4">
         {product.inStock ? "במלאי" : "אזל מהמלאי"}
       </p>
+
+      <TrustBadges />
+
+      {/* Sticky Add to Cart במובייל בלבד */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-cream/95 backdrop-blur border-t border-amber-gold/20 p-3 flex items-center gap-3">
+        <span className="font-body text-sm font-medium text-charcoal shrink-0">
+          {displayPrice} ₪
+        </span>
+        <button
+          onClick={handleAddToCart}
+          className="flex-1 font-body text-sm tracking-wide bg-amber-deep text-cream px-6 py-3 rounded-sm"
+        >
+          {added ? "נוסף לסל" : "הוסיפי לסל"}
+        </button>
+      </div>
     </div>
   );
 }
