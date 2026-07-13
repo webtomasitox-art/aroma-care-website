@@ -15,6 +15,7 @@ export interface Product {
   id: string;               // slug ייחודי, לדוגמה "kerem-lachut-liom"
   name: string;              // שם בעברית
   nameEn?: string | null;    // שם באנגלית, אם קיים
+  latinName?: string | null; // שם לטיני בוטני, רק אם מופיע במקור (בעיקר שמנים אתריים)
   sku?: string | null;       // TODO: לא קיים במקור באקסל - יושלם בשלב ייבוא ל-Wix
   category: string;
   subcategory?: string | null; // TODO: לא קיים במקור - כרגע יש רק קטגוריה ראשית אחת
