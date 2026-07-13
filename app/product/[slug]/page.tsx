@@ -3,6 +3,7 @@ import { getAllProducts, getProductById } from "@/services/productService";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { Accordion, AccordionItem } from "@/components/ui/Accordion";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductPurchasePanel } from "@/components/product/ProductPurchasePanel";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -36,6 +37,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
     { label: product.name },
   ]);
 
+  const descriptionRemainder = product.fullDescription.startsWith(product.shortDescription)
+    ? product.fullDescription.slice(product.shortDescription.length).trim()
+    : product.fullDescription;
+
   return (
     <>
       <script
@@ -67,70 +72,62 @@ export default async function ProductPage({ params }: { params: { slug: string }
           <ProductPurchasePanel product={product} />
         </div>
 
-        {/* תיאור מלא - רק החלק שלא כבר מוצג כתיאור הקצר מעל */}
-        {(() => {
-          const remainder = product.fullDescription.startsWith(product.shortDescription)
-            ? product.fullDescription.slice(product.shortDescription.length).trim()
-            : product.fullDescription;
-          return remainder ? (
-            <section className="max-w-3xl mt-16">
-              <h2 className="font-heading text-xl text-amber-deep mb-4">על המוצר</h2>
+        <Accordion>
+          {descriptionRemainder && (
+            <AccordionItem title="על המוצר" defaultOpen>
               <p className="font-body text-sm text-charcoal/75 leading-relaxed whitespace-pre-line">
-                {remainder}
+                {descriptionRemainder}
               </p>
-            </section>
-          ) : null;
-        })()}
+            </AccordionItem>
+          )}
 
-        {/* רכיבים - רק אם זוהו רכיבים מובנים */}
-        {product.ingredients && product.ingredients.length > 0 && (
-          <section className="max-w-3xl mt-12">
-            <h2 className="font-heading text-xl text-amber-deep mb-4">רכיבים עיקריים ויתרונותיהם</h2>
-            <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
-              {product.ingredients.map((ing, i) => (
-                <li key={i} className="font-body text-sm text-charcoal/75">
-                  <span className="text-amber-deep font-medium">{ing}</span>
-                  {product.benefits?.[i] && (
-                    <span className="text-charcoal/60"> - {product.benefits[i]}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+          {product.ingredients && product.ingredients.length > 0 && (
+            <AccordionItem title="רכיבים עיקריים ויתרונותיהם">
+              <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
+                {product.ingredients.map((ing, i) => (
+                  <li key={i} className="font-body text-sm text-charcoal/75">
+                    <span className="text-amber-deep font-medium">{ing}</span>
+                    {product.benefits?.[i] && (
+                      <span className="text-charcoal/60"> - {product.benefits[i]}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </AccordionItem>
+          )}
 
-        {/* הוראות שימוש - רק אם קיימות */}
-        {product.usageInstructions && (
-          <section className="max-w-3xl mt-12">
-            <h2 className="font-heading text-xl text-amber-deep mb-4">הוראות שימוש</h2>
-            <p className="font-body text-sm text-charcoal/75 leading-relaxed whitespace-pre-line">
-              {product.usageInstructions}
-            </p>
-          </section>
-        )}
+          {product.usageInstructions && (
+            <AccordionItem title="הוראות שימוש">
+              <p className="font-body text-sm text-charcoal/75 leading-relaxed whitespace-pre-line">
+                {product.usageInstructions}
+              </p>
+            </AccordionItem>
+          )}
 
-        {/* אזהרות - רק אם קיימות במקור */}
-        {product.warnings && (
-          <section className="max-w-3xl mt-12">
-            <h2 className="font-heading text-xl text-amber-deep mb-4">אזהרות</h2>
-            <p className="font-body text-sm text-charcoal/75 leading-relaxed">{product.warnings}</p>
-          </section>
-        )}
+          {product.warnings && (
+            <AccordionItem title="אזהרות">
+              <p className="font-body text-sm text-charcoal/75 leading-relaxed">
+                {product.warnings}
+              </p>
+            </AccordionItem>
+          )}
 
-        {/* מתכון שימוש ביתי - רק אם קיים במקור, מוצג כטאב סגור */}
-        {product.recipe && (
-          <section className="max-w-3xl mt-12">
-            <details className="group">
-              <summary className="font-heading text-xl text-amber-deep cursor-pointer list-none flex items-center gap-2">
-                <span className="inline-block transition-transform group-open:rotate-90">›</span>
-                מתכון לשימוש ביתי
-              </summary>
-              <p className="font-body text-sm text-charcoal/75 leading-relaxed whitespace-pre-line mt-4">
+          {product.recipe && (
+            <AccordionItem title="מתכון לשימוש ביתי">
+              <p className="font-body text-sm text-charcoal/75 leading-relaxed whitespace-pre-line">
                 {product.recipe}
               </p>
-            </details>
-          </section>
-        )}
+            </AccordionItem>
+          )}
+
+          <AccordionItem title="למה לקנות אצלנו">
+            <ul className="font-body text-sm text-charcoal/75 leading-relaxed space-y-2">
+              <li>רישיון יצרן ממשרד הבריאות ותקן איכות ISO 22716 (NSP - Natural Skin Products).</li>
+              <li>רשימת רכיבים מלאה בכל דף מוצר, ללא הסתרה.</li>
+              <li>תשלום מאובטח דרך Checkout מוצפן של Wix.</li>
+            </ul>
+          </AccordionItem>
+        </Accordion>
 
         {/* מוצרים דומים */}
         {relatedProducts.length > 0 && (
