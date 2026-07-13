@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductPurchasePanel } from "@/components/product/ProductPurchasePanel";
 import { ProductCard } from "@/components/product/ProductCard";
-import { buildProductMetadata, buildProductSchema } from "@/lib/seo/metadata";
+import { buildProductMetadata, buildProductSchema, buildBreadcrumbSchema } from "@/lib/seo/metadata";
 
 export async function generateStaticParams() {
   const products = await getAllProducts();
@@ -29,18 +29,27 @@ export default async function ProductPage({ params }: { params: { slug: string }
     .slice(0, 4);
 
   const categorySlug = product.category === "מוצרי קוסמטיקה" ? "face-care" : "essential-oils";
-  const schema = buildProductSchema(product);
+  const productSchema = buildProductSchema(product);
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { label: "בית", href: "/" },
+    { label: product.category, href: `/category/${categorySlug}` },
+    { label: product.name },
+  ]);
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
       <Header />
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="max-w-6xl mx-auto px-6 py-10 pb-28 md:pb-10">
         <Breadcrumbs
           items={[
             { label: "בית", href: "/" },
