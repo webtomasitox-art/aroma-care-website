@@ -1,5 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "@/hooks/useCart";
+import { trackEvent } from "@/lib/analytics/events";
 import type { Product } from "@/types/product";
 
 interface ProductCardProps {
@@ -7,8 +12,28 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { addItem } = useCart();
+  const [added, setAdded] = useState(false);
+
   // "פס המרכיב" - האלמנט הייחודי מהקונספט: 2-3 רכיבים אמיתיים מתחת לשם
   const featuredIngredients = product.ingredients?.slice(0, 2) ?? [];
+  const hasVariants = !!product.variants && product.variants.length > 0;
+
+  function handleQuickAdd(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({
+      productId: product.id,
+      name: product.name,
+      nameEn: product.nameEn,
+      price: product.price,
+      quantity: 1,
+      image: product.mainImage,
+    });
+    trackEvent("add_to_cart", { productId: product.id, quantity: 1 });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  }
 
   return (
     <Link
@@ -38,12 +63,25 @@ export function ProductCard({ product }: ProductCardProps) {
         </p>
       )}
 
-      <div className="flex items-center justify-between mt-3">
+      <div className="flex items-center justify-between mt-3 mb-3">
         <span className="font-body text-sm font-medium text-charcoal">{product.price} ₪</span>
         {product.volume && (
           <span className="font-label text-[11px] text-charcoal/50">{product.volume}</span>
         )}
       </div>
+
+      {hasVariants ? (
+        <span className="block text-center font-body text-xs tracking-wide border border-amber-gold/40 text-amber-deep rounded-sm py-2">
+          בחרו נפח
+        </span>
+      ) : (
+        <button
+          onClick={handleQuickAdd}
+          className="w-full font-body text-xs tracking-wide bg-amber-deep text-cream rounded-sm py-2 hover:bg-charcoal transition-colors"
+        >
+          {added ? "נוסף לסל" : "הוסיפי לסל"}
+        </button>
+      )}
     </Link>
   );
 }
